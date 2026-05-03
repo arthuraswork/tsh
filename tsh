@@ -1,0 +1,8 @@
+#!/bin/bash
+cmd=$1
+arg=$2
+
+case $cmd in 
+    run)
+poetry run python final.py $arg
+esac
