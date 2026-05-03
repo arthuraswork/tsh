@@ -173,10 +173,11 @@ class Core:
         if line.startswith('?'):
             return self.questfuncs(line)
 
-        self.console_out(line)
+        self.console_out(styling_func(line))
     
+    @staticmethod
     def console_out(line: str):
-        sys.stdout.write(styling_func(line))
+        sys.stdout.write(line)
 
     def sharpfuncs(self, line):
         if line.startswith('#!'):
