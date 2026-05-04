@@ -25,6 +25,6 @@ def jsonl(line: str):
     with open(filepath, 'r',encoding='utf-8') as f:
         for l in f:
             data = json.loads(l)
-            result = form.format(**data).replace('_',' ')
+            result = form.format(**data).replace('\\n','\n').replace('\\t','\t')
             output.append(result)
     return '\n'.join(output)

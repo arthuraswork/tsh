@@ -3,7 +3,7 @@ import readline
 import subprocess
 import json
 import os
-from src.external import animations
+from draw import animations
 from src.consts import *
 import src.modules as modules
 
@@ -74,10 +74,13 @@ def load(line: str):
             return json.load(f)
 
 def conditions(line: str):
-    args = line.split('(')[1].split(')')[0].split()
-    for op in COMPFUNCS:
-        if op == args[1]:
-            return COMPFUNCS[op](args[0],args[2])
+    expr = line.split('(')[1].split(')')[0]
+    for func in COMPFUNCS:
+        if func in expr:
+            a,b = expr.split(func)
+            a = a.strip()
+            b = b.strip()
+            return COMPFUNCS[func](a,b)
     return False
 
 def path_extract(line):
@@ -137,11 +140,14 @@ class Core:
         return line
 
     def execution_func(self, line: str):
+        if line.startswith('rerun!'):
+            return 'rerun'
+        if line.startswith('exit!'):
+            exit(code=line.split('exit!')[-1])
         if line.startswith('//'):
-            return
+            return 'comment'
         if '//' in line:
             line = line.split('//')[0]
-
         if self.locals:
             line = self.interpolation(line)
 
@@ -157,9 +163,10 @@ class Core:
                 self.fork(path)
                 if info:
                     sys.stdout.write(f'{path} -> {self.path}\n')
-                return
+                return 'fork'
             else:
                 raise Exception(f'File {path} not found')
+            
         if line.startswith('dump'):
             dump(line, self.locals)
             
@@ -173,11 +180,12 @@ class Core:
         if line.startswith('?'):
             return self.questfuncs(line)
 
-        self.console_out(styling_func(line))
+        return self.console_out(styling_func(line))
     
     @staticmethod
     def console_out(line: str):
         sys.stdout.write(line)
+        return 'console'
 
     def sharpfuncs(self, line):
         if line.startswith('#!'):
@@ -186,6 +194,7 @@ class Core:
         if line.startswith('#include'):
             result = include(line)
             self.funcs = self.funcs | result
+        return 'sharp'
 
     def questfuncs(self, line: str):
         if line.startswith('?draw'):
@@ -204,7 +213,9 @@ class Core:
             if conditions(line):
                 self.execution_func(line.split('->')[-1].split('||')[0].strip())
             else:
-                self.execution_func(line.split('||')[-1].strip())
+                if '||' in line:
+                    self.execution_func(line.split('||')[-1].strip())
+        return 'question'
     def fork(self, path):
         new = Core(path)
         new.run()
@@ -212,5 +223,7 @@ class Core:
     def run(self, index=0):
 
         for line in self.lines[index:]:
-            self.execution_func(line)     
+            result = self.execution_func(line)
+            if result == 'rerun':     
+                return 1
         sys.stdout.write('\n')

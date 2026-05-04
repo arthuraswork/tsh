@@ -4,5 +4,5 @@ arg=$2
 
 case $cmd in 
     run)
-poetry run python final.py $arg
+poetry run python tsh.py $arg
 esac

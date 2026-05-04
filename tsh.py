@@ -1,9 +1,19 @@
 from src.core import Core
 import sys
-if __name__ == '__main__':
+
+def run():
     args = sys.argv
-    if len(args) > 1:
-        core = Core(args[1])
-        core.run()
-    else:
-        raise Exception('Repl is not done')
+    try:
+        if len(args) > 1:
+            core = Core(args[1])
+            result = core.run()
+            if result == 1:
+                return run()
+        else:
+            raise Exception('Repl is not done')
+    except Exception as e:
+        print(e)
+
+
+if __name__ == '__main__':
+    run()
