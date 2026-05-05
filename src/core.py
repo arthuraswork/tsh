@@ -142,8 +142,8 @@ class Core:
     def execution_func(self, line: str):
         if line.startswith('rerun!'):
             return 'rerun'
-        if line.startswith('exit!'):
-            exit(code=line.split('exit!')[-1])
+        if line.startswith('exit('):
+            exit(code=line.split('exit(')[-1].split(')')[0])
         if line.startswith('//'):
             return 'comment'
         if '//' in line:
@@ -183,6 +183,10 @@ class Core:
     
     @staticmethod
     def console_out(line: str):
+        if '--noprint' in line:
+            return 'noprint'
+        if '--nolb' in line:
+            line = line.replace('\n','').replace('--nolb','')
         sys.stdout.write(line)
         return 'console'
 
