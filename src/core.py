@@ -3,7 +3,7 @@ import readline
 import subprocess
 import json
 import os
-from draw import animations
+from src.draw import animations
 from src.consts import *
 import src.modules as modules
 
@@ -150,7 +150,6 @@ class Core:
             line = line.split('//')[0]
         if self.locals:
             line = self.interpolation(line)
-
         if self.funcs:
             if '!' in line:
                 line = self.funcman(line)
@@ -221,9 +220,11 @@ class Core:
         new.run()
 
     def run(self, index=0):
-
+        events = []
         for line in self.lines[index:]:
-            result = self.execution_func(line)
-            if result == 'rerun':     
+            event = self.execution_func(line)
+            events.append(event)
+            if event == 'rerun':     
                 return 1
         sys.stdout.write('\n')
+        return events

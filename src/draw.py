@@ -24,7 +24,6 @@ def animations(text: str):
 
     elems = text[begin + 1: end].split(',')
     dur = float(text[time_start+1: time_end])
-    
     if '@div' not in text and '@each' not in text:
         end_time = time.time() + dur
         i = 0
