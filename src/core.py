@@ -2,6 +2,7 @@ import sys
 import readline
 import subprocess
 import json
+import datetime
 import os
 from src.draw import animations
 from src.consts import *
@@ -91,23 +92,40 @@ def path_extract(line):
     return '', info    
 
 class Core:
-    def __init__(self, path, args = None):
-        if not args:
-            try:
-                with open(path, 'r') as f:
-                    file = f.readlines()
-                    meta = file[0].split(':')
-                    self.name: str = meta[0]
-                    self.lines: str = file[1:]
-                    self.dtime: str = meta[1]
-                    self.path = path
-                    self.locals: dict = dict()
-                    self.funcs: dict = dict()
-            except FileNotFoundError:
-                raise FileExistsError()
+    def __init__(self, path = None, args = None):
+        if path:
+            if not args:
+                try:
+                    with open(path, 'r') as f:
+                        file = f.readlines()
+                        meta = file[0].split(':')
+                        self.name: str = meta[0]
+                        self.lines: str = file[1:]
+                        self.dtime: str = meta[1]
+                        self.path = path
+                        self.locals: dict = dict()
+                        self.funcs: dict = dict()
+                except FileNotFoundError:
+                    raise FileExistsError()
+            else:
+                self.lines = args['lines']
         else:
-            self.lines = args['lines']
-        
+            self.name: str = 'repl'
+            self.lines: str = []
+            self.dtime: str = datetime.datetime.now().isoformat()
+            self.path = './'
+            self.locals: dict = dict()
+            self.funcs: dict = dict()
+            print('REPL mod for tsh:')
+
+    def repl_mod(self):
+        while True:
+            try:
+                user_input = input('->')
+                self.execution_func(user_input)
+                sys.stdout.write('\n')
+            except Exception as e:
+                print(e)
 
     def interpolation(self, line: str):
         for name in self.locals:

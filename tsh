@@ -5,4 +5,7 @@ arg=$2
 case $cmd in 
     run)
 poetry run python tsh.py $arg
+;;
+    repl)
+poetry run python ./src/repl.py
 esac

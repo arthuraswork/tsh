@@ -7,7 +7,7 @@ def Template(line:str):
 
 def Replace(line: str):
     line = line[1:-1]
-    string, old, new = line.split('`')
+    string, old, new = line.split(',')
     return string.replace(old, new)
 
 tools = {
