@@ -15,6 +15,9 @@ def execution(line:str):
     if '/python-unsafe' in line:
         py_cmd = line.split('/python-unsafe')[-1]
         exec(py_cmd.strip())
+    if '/python3' in line:
+        py_file = line.split('/python3')[-1]
+        return subprocess.run(f'python3 {py_file}', shell=True, text=True).stdout
 
 def var_define(line: str):
     words = line.split(maxsplit=1)
@@ -87,9 +90,10 @@ def conditions(line: str):
 def path_extract(line):
     path = line.split('(')[-1].split(')')[0]
     info = True if '-i' in line else False
+    args = line.split('{')[-1].split('}')[0].split(',')
     if os.path.exists(path): 
-        return path, info
-    return '', info    
+        return path, info, args 
+    raise f'fork() exception, {path} not found'
 
 class Core:
     def __init__(self, path = None, args = None):
@@ -173,11 +177,11 @@ class Core:
                 line = self.funcman(line)
 
         if line.startswith('fork'):
-            path, info = path_extract(line)
+            path, info, args = path_extract(line)
             if path:
                 if info: 
                     sys.stdout.write(f'{self.path} -> {path}\n')
-                self.fork(path)
+                self.fork(path, args)
                 if info:
                     sys.stdout.write(f'{path} -> {self.path}\n')
                 return 'fork'
@@ -237,8 +241,10 @@ class Core:
                 if '||' in line:
                     self.execution_func(line.split('||')[-1].strip())
         return 'question'
-    def fork(self, path):
+    def fork(self, path, args=None):
         new = Core(path)
+        if args:
+            new.locals = new.locals | {f'${i}': v.strip() for i, v in enumerate(args)}
         new.run()
 
     def run(self, index=0):
