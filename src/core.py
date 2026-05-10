@@ -57,13 +57,19 @@ def questoins_func(line: str):
     else:
         return input('>>>')
 
+def byte_format(line: str):
+    if r"\n" in line:
+        line = line.replace(r"\n",'\n')
+    if r"\t" in line:
+        line = line.replace(r"\t",'\t')
+    return line
 def styling_func(line: str):
     for style_type in STYLES:
         if f'[{style_type}:' in line:
             for style in STYLES[style_type]:
                 if f'[{style_type}:{style}]' in line:
                     line = line.replace(f'[{style_type}:{style}]', STYLES[style_type][style])
-    return line
+    return byte_format(line)
 
 def dump(line: str, vars: dict):
     path = line.split('(')[-1].split(')')[0]
@@ -76,6 +82,19 @@ def load(line: str):
     if path:
         with open(path, 'r', encoding='utf-8') as f:
             return json.load(f)
+        
+def line_former(template: str, path: str, line: str):
+    if '.csv' in path:
+        args = line.split(',')
+        i = 0
+        len_args = len(args)
+        while '_' in template and i != len_args:
+            template = template.replace('_', args[i],1)
+            i += 1
+        return template
+    else:
+        return line 
+
 
 def conditions(line: str):
     expr = line.split('(')[1].split(')')[0]
@@ -134,7 +153,11 @@ class Core:
     def interpolation(self, line: str):
         for name in self.locals:
             if name in line:
-                line = line.replace(name, self.locals[name])
+                value = self.locals[name]
+                if len(value) < len(name):
+                    value += ' ' * (len(name) - len(value))
+                line = line.replace(name, value)
+
         return line
 
     def funcman(self, line: str):
@@ -176,6 +199,42 @@ class Core:
             if '!' in line:
                 line = self.funcman(line)
 
+        if any(True for func in INCLUDE_FUNCS if func in line):
+            result = self.included()
+            if result == 'fork':
+                return result
+        
+        if line.startswith('<') and '>' in line:
+            return self.template_funcs(line)
+
+
+        if line.startswith('#'):
+            return self.sharpfuncs(line)
+            
+        if line.startswith('?'):
+            return self.questfuncs(line)
+
+        return self.console_out(styling_func(line))
+    
+    def template_funcs(self, line):
+        template = line.split('<')[-1].split('>')[0]
+        path,_,_ = path_extract(line.split('(')[-1].split(')')[0])
+        with open(path, 'r', encoding='utf-8') as f:
+            for l in  f.readlines():
+                formated_template = line_former(template, path, l) 
+                sys.stdout.write(styling_func(formated_template))
+        return 'template'
+
+    @staticmethod
+    def console_out(line: str):
+        if '--noprint' in line:
+            return 'noprint'
+        if '--nolb' in line:
+            line = line.replace('\n','').replace('--nolb','')
+        sys.stdout.write(line)
+        return 'console'
+    
+    def included(self, line):
         if line.startswith('fork'):
             path, info, args = path_extract(line)
             if path:
@@ -194,23 +253,6 @@ class Core:
         if line.startswith('load'):
             extra = load(line)
             self.locals = self.locals | extra
-
-        if line.startswith('#'):
-            return self.sharpfuncs(line)
-            
-        if line.startswith('?'):
-            return self.questfuncs(line)
-
-        return self.console_out(styling_func(line))
-    
-    @staticmethod
-    def console_out(line: str):
-        if '--noprint' in line:
-            return 'noprint'
-        if '--nolb' in line:
-            line = line.replace('\n','').replace('--nolb','')
-        sys.stdout.write(line)
-        return 'console'
 
     def sharpfuncs(self, line):
         if line.startswith('#!'):

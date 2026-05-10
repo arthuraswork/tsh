@@ -1,4 +1,13 @@
 import questionary
+
+INCLUDE_FUNCS = {
+    'fork', 'dump', 'load'
+}
+
+FILE_EXT = {
+    '.csv', '.jsonl'
+}
+
 STYLES = {
     "color": {
         "black": '\033[30m',
@@ -39,7 +48,7 @@ COMPFUNCS = {
     '!=' : lambda a,b: a != b,
     'in' : lambda a,b: a in b,
     'starts' : lambda a,b: a.startswith(b),
-    'ends' : lambda a,b: a.endswith(b)
+    'ends' : lambda a,b: a.endswith(b),
 }
 
 QUESTIONS = {
