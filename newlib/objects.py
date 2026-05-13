@@ -1,5 +1,5 @@
 from newlib.define import Module
-import datetime
+from datetime import datetime
 import random
 
 content = {
@@ -13,4 +13,4 @@ content = {
     '#randint16': lambda: random.randint(0,15),
 }
 
-objects = Module('objects',content) 
+tsh_objects = Module('objects',content) 
