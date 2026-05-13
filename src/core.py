@@ -6,8 +6,7 @@ import datetime
 import os
 from src.draw import animations
 from src.consts import *
-import src.modules as modules
-from new_module_system import modules
+from src.new_module_system import modules
 
 def execution(line:str):
     if '/bin/bash' in line:
@@ -31,11 +30,11 @@ def new_including_sys(line: str):
     if '::' not in importing_name:
         raise Exception('Uncorrect including form, use <module::function>')
     else:
-        module, function = importing_name.split('::',1)
+        module, funcname = importing_name.split('::',1)
         if module in modules.modules:
-            if function in modules.modules[module].content:
-                return modules.modules[module].content
-            raise Exception(f'Unknown function {function}')    
+            if funcname in modules.modules[module]:
+                return funcname, modules.modules[module][funcname]
+            raise Exception(f'Unknown function {funcname}')    
         raise Exception(f'Unknown module, {module}')
         
 
@@ -175,28 +174,24 @@ class Core:
         return line
 
     def funcman(self, line: str):
-        words = line.split()
-        if len(words) == 1:
-            func_in_text = words[0]
-            funcname = func_in_text.split('!')[0] + '!'
-            args = func_in_text.split('!',1)[-1]
-            func = self.funcs.get(funcname)
-            if func:
-                return func(args)
+        if '?set:' in line:
+            funcpart = line.split(' ',1)[-1]
         else:
-            for i, word in enumerate(words):
-                if '!' in word:
-                    funcname = word.split('!')[0] + '!'
-                    if '(' in word and ')' not in word:
-                        for w in words[i+1:]:
-                            word += f' {w}'
-                            if ')' in w:
-                                break
-                    args = word.split('!',1)[-1]
-                    func = self.funcs.get(funcname)
-                    if func:
-                        return line.replace(word, func(args))
-        return line
+            funcpart = line
+
+        funcname = funcpart.split('(')[0]
+        func = self.funcs.get(funcname)
+        if func:
+            args = funcpart.split('(')[-1].split(')')[0]
+            if args:
+                result = str(func(args))
+                return line.replace(funcpart, result if '\n' in line else result)
+            else:
+                result = str(func())
+                return line.replace(funcpart, result + '\n' if '\n' in line else result)
+        raise Exception(f'Unknown function {funcname}')
+             
+
 
     def execution_func(self, line: str):
         if line.startswith('rerun!'):
@@ -210,7 +205,7 @@ class Core:
         if self.locals:
             line = self.interpolation(line)
         if self.funcs:
-            if '!' in line:
+            if '!' in line and '(' in line and ')' in line:
                 line = self.funcman(line)
 
         if any(True for func in INCLUDE_FUNCS if func in line):
@@ -219,7 +214,7 @@ class Core:
                 return result
         
         if line.startswith('<') and '>' in line:
-            return self.template_funcs(line)
+            line = self.template_funcs(line)
 
 
         if line.startswith('#'):
@@ -233,11 +228,13 @@ class Core:
     def template_funcs(self, line):
         template = line.split('<')[-1].split('>')[0]
         path,_,_ = path_extract(line.split('(')[-1].split(')')[0])
+        line = ''
         with open(path, 'r', encoding='utf-8') as f:
             for l in  f.readlines():
                 formated_template = line_former(template, path, l) 
-                sys.stdout.write(styling_func(formated_template))
-        return 'template'
+                line += formated_template
+
+        return line
 
     @staticmethod
     def console_out(line: str):
@@ -246,7 +243,7 @@ class Core:
         if '--nolb' in line:
             line = line.replace('\n','').replace('--nolb','')
         sys.stdout.write(line)
-        return 'console'
+        return line
     
     def controls_and_memory(self, line):
         if line.startswith('fork'):
@@ -273,8 +270,8 @@ class Core:
             line = execution(line)
             if not line: return
         if line.startswith('#include'):
-            result = new_including_sys(line)
-            self.funcs = self.funcs | result
+            funcname, result = new_including_sys(line)
+            self.funlcs[funcname] = result
         return 'sharp'
 
     def questfuncs(self, line: str):
@@ -282,12 +279,15 @@ class Core:
             animations(line)
         if line.startswith('?set:'):
             name, value = var_define(line)
+            value = self.execution_func(value)
             self.locals[name] = value
         if line.startswith('?:'):
+
             if '>>' in line:
                 name   = line.split('>>')[1].strip()
                 result = questoins_func(line)
                 self.locals[name] = result
+
             else:
                 sys.stdout.write(questoins_func(line) + '\n')
         if line.startswith('?('):

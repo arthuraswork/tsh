@@ -10,14 +10,14 @@ def animations(text: str):
     sys.stdout.write('\033[?25l')
     elems = text.split('{')[-1].split('}')[0].split(',')
     dur = float(text.split('(')[-1].split(')')[0])
-    if '::div' in text:
+    if '.div' in text:
         foreach = dur / len(elems) 
         for e in elems:
             sys.stdout.write(f'\r{e}' + ' ' * buf)
             sys.stdout.flush()
             time.sleep(foreach)
 
-    elif '@each' in text:
+    elif '.each' in text:
         for e in elems:
             sys.stdout.write(f'\r{e}' + ' ' * buf)
             sys.stdout.flush()
