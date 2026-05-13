@@ -12,6 +12,7 @@ def run():
             result = core.run()
             if result == 1:
                 return run()
+            
         else:
             raise Exception('For REPL use ./tsh repl')
     except Exception as e:

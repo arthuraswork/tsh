@@ -196,7 +196,7 @@ class Core:
              
 
 
-    def execution_func(self, line: str):
+    def execution_func(self, line: str, write_line = True):
         if line.startswith('rerun!'):
             return 'rerun'
         if line.startswith('exit('):
@@ -208,7 +208,7 @@ class Core:
             if varname in self.locals:
                 self.locals[write_to] = 'True'
             else:
-                self.locals[write_to] = False
+                self.locals[write_to] = 'False'
             return 'existing checking'
 
         if '//' in line:
@@ -232,8 +232,9 @@ class Core:
             
         if line.startswith('?'):
             return self.questfuncs(line)
-
-        return self.console_out(styling_func(line))
+        if write_line:
+            return self.console_out(styling_func(line))
+        return line
     
     def template_funcs(self, line):
         template = line.split('<')[-1].split('>')[0]
@@ -289,7 +290,7 @@ class Core:
             animations(line)
         if line.startswith('?set:'):
             name, value = var_define(line)
-            value = self.execution_func(value)
+            value = self.execution_func(value, False)
             self.locals[name] = value
         if line.startswith('?:'):
 
