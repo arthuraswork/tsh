@@ -128,23 +128,24 @@ def path_extract(line):
     raise f'fork() exception, {path} not found'
 
 class Core:
-    def __init__(self, path = None, args = None):
+    def __init__(self, path = None, *args):
+
         if path:
-            if not args:
-                try:
-                    with open(path, 'r') as f:
-                        file = f.readlines()
-                        meta = file[0].split(':')
-                        self.name: str = meta[0]
-                        self.lines: str = file[1:]
-                        self.dtime: str = meta[1]
-                        self.path = path
-                        self.locals: dict = dict()
-                        self.funcs: dict = dict()
-                except FileNotFoundError:
-                    raise FileExistsError()
-            else:
-                self.lines = args['lines']
+            try:
+                with open(path, 'r') as f:
+                    file = f.readlines()
+                    meta = file[0].split(':')
+                    self.name: str = meta[0]
+                    self.lines: str = file[1:]
+                    self.dtime: str = meta[1]
+                    self.path = path
+                    self.locals: dict = dict()
+                    self.funcs: dict = dict()
+            except FileNotFoundError:
+                raise FileExistsError()
+            if args: 
+                for i, arg in enumerate(args[0]): 
+                    self.locals[f'${i}'] = arg
         else:
             self.name: str = 'repl'
             self.lines: str = []

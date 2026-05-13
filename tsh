@@ -12,10 +12,10 @@ case $cmd in
 ;;
     run)
 source tsh/venv/bin/activate
-python3 ./tsh/tsh.py $arg 
+python3 ./tsh/tsh.py "$@"
 ;;
     run-poetry)
-poetry run python tsh.py $arg
+poetry run python tsh.py "$@"
 ;;
     repl)
 poetry run python ./src/repl.py
