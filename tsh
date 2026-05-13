@@ -3,7 +3,18 @@ cmd=$1
 arg=$2
 
 case $cmd in 
+    init)
+    if [ "$arg" == "venv" ]; then
+        python3 -m venv venv
+        . venv/bin/activate
+        pip install questionary
+    fi
+;;
+
     run)
+python3 ./tsh/tsg.py $arg 
+
+    run-poetry)
 poetry run python tsh.py $arg
 ;;
     repl)
