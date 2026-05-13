@@ -7,6 +7,7 @@ import os
 from src.draw import animations
 from src.consts import *
 import src.modules as modules
+from new_module_system import modules
 
 def execution(line:str):
     if '/bin/bash' in line:
@@ -24,6 +25,19 @@ def var_define(line: str):
     name = words[0].split(':')[-1]
     value = words[1].replace('\n','')
     return name, value
+
+def new_including_sys(line: str):
+    importing_name = line.split('<')[-1].split('>')[0].strip()
+    if '::' not in importing_name:
+        raise Exception('Uncorrect including form, use <module::function>')
+    else:
+        module, function = importing_name.split('::',1)
+        if module in modules.modules:
+            if function in modules.modules[module].content:
+                return modules.modules[module].content
+            raise Exception(f'Unknown function {function}')    
+        raise Exception(f'Unknown module, {module}')
+        
 
 def include(line: str):
     func = line.split('<')[-1].split('>')[0].strip()
@@ -200,7 +214,7 @@ class Core:
                 line = self.funcman(line)
 
         if any(True for func in INCLUDE_FUNCS if func in line):
-            result = self.included()
+            result = self.controls_and_memory()
             if result == 'fork':
                 return result
         
@@ -234,7 +248,7 @@ class Core:
         sys.stdout.write(line)
         return 'console'
     
-    def included(self, line):
+    def controls_and_memory(self, line):
         if line.startswith('fork'):
             path, info, args = path_extract(line)
             if path:
@@ -259,7 +273,7 @@ class Core:
             line = execution(line)
             if not line: return
         if line.startswith('#include'):
-            result = include(line)
+            result = new_including_sys(line)
             self.funcs = self.funcs | result
         return 'sharp'
 

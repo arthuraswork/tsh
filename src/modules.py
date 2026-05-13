@@ -3,6 +3,7 @@ from stdlib.strtools import tools
 from stdlib.comporations import fl_condition, int_condition
 from stdlib.toolslib import timeout, jsonl, fromtxt
 from stdlib.math import calculations, unsafe
+from stdlib.sound import say
 libs = {
     'calculations!': calculations,
     'unsafe!': unsafe,
@@ -11,5 +12,7 @@ libs = {
     'fromtxt!': fromtxt,
     'stdvar!': stdvar,
     'fc!': fl_condition,
-    'ic!': int_condition
-} | tools 
+    'ic!': int_condition,
+    'say!': say
+
+} | tools
