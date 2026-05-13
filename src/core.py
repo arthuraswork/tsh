@@ -181,7 +181,6 @@ class Core:
             funcpart = line.split(' ',1)[-1]
         else:
             funcpart = line
-
         funcname = funcpart.split('(')[0]
         func = self.funcs.get(funcname)
         if func:
@@ -231,7 +230,7 @@ class Core:
             return self.sharpfuncs(line)
             
         if line.startswith('?'):
-            return self.questfuncs(line)
+            return self.questfuncs(line, write_line)
         if write_line:
             return self.console_out(styling_func(line))
         return line
@@ -285,29 +284,28 @@ class Core:
             self.funlcs[funcname] = result
         return 'sharp'
 
-    def questfuncs(self, line: str):
+    def questfuncs(self, line: str, write_line):
         if line.startswith('?draw'):
             animations(line)
+
         if line.startswith('?set:'):
             name, value = var_define(line)
             value = self.execution_func(value, False)
             self.locals[name] = value
+            
         if line.startswith('?:'):
-
             if '>>' in line:
                 name   = line.split('>>')[1].strip()
                 result = questoins_func(line)
                 self.locals[name] = result
-
             else:
                 sys.stdout.write(questoins_func(line) + '\n')
         if line.startswith('?('):
             if conditions(line):
-                self.execution_func(line.split('->')[-1].split('||')[0].strip())
+                return self.execution_func(line.split('->')[-1].split('||')[0].strip(), write_line)
             else:
                 if '||' in line:
-                    self.execution_func(line.split('||')[-1].strip())
-        return 'question'
+                    return self.execution_func(line.split('||')[-1].strip(), write_line)
     def fork(self, path, args=None):
         new = Core(path)
         if args:
