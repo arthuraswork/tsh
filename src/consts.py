@@ -60,3 +60,5 @@ QUESTIONS = {
     'Path': questionary.path
 
 }
+
+CONDS_VM = ['-l']

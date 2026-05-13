@@ -117,7 +117,7 @@ def conditions(line: str):
             a = a.strip()
             b = b.strip()
             return COMPFUNCS[func](a,b)
-    return False
+    raise Exception('Unknown operator')
 
 def path_extract(line):
     path = line.split('(')[-1].split(')')[0]
@@ -167,10 +167,12 @@ class Core:
     def interpolation(self, line: str):
         for name in self.locals:
             if name in line:
-                value = self.locals[name]
-                if len(value) < len(name):
-                    value += ' ' * (len(name) - len(value))
-                line = line.replace(name, value)
+                id = line.index(name)
+                if line[id-1] != '/':
+                    value = self.locals[name]
+                    if len(value) < len(name):
+                        value += ' ' * (len(name) - len(value))
+                    line = line.replace(name, value)
 
         return line
 
@@ -201,6 +203,14 @@ class Core:
             exit(code=line.split('exit(')[-1].split(')')[0])
         if line.startswith('//'):
             return 'comment'
+        if line.startswith('exists?') and '>>' in line:
+            _, varname, _, write_to = line.split()
+            if varname in self.locals:
+                self.locals[write_to] = 'True'
+            else:
+                self.locals[write_to] = False
+            return 'existing checking'
+
         if '//' in line:
             line = line.split('//')[0]
         if self.locals:
@@ -216,7 +226,6 @@ class Core:
         
         if line.startswith('<') and '>' in line:
             line = self.template_funcs(line)
-
 
         if line.startswith('#'):
             return self.sharpfuncs(line)
