@@ -1,9 +1,9 @@
-from newlib.objects import tsh_objects
-from newlib.define import Module
-from newlib.math_tsh import tsh_math
-from newlib.tools import tools
-from newlib.sounds import sounds 
-from newlib.comparison import comparison
+from stdlib.objects import tsh_objects
+from stdlib.define import Module
+from stdlib.math_tsh import tsh_math
+from stdlib.tools import tools
+from stdlib.sounds import sounds 
+from stdlib.comparison import comparison
 class Modules:
     modules = dict()
 

@@ -125,11 +125,10 @@ def path_extract(line):
     args = line.split('{')[-1].split('}')[0].split(',')
     if os.path.exists(path): 
         return path, info, args 
-    raise f'fork() exception, {path} not found'
+    raise Exception(f'-> {line}\nfork() exception, {path} not found')
 
 class Core:
     def __init__(self, path = None, *args):
-
         if path:
             try:
                 with open(path, 'r') as f:
@@ -219,7 +218,7 @@ class Core:
                 line = self.funcman(line)
 
         if any(True for func in INCLUDE_FUNCS if func in line):
-            result = self.controls_and_memory()
+            result = self.controls_and_memory(line)
             if result == 'fork':
                 return result
         
@@ -281,7 +280,7 @@ class Core:
             if not line: return
         if line.startswith('#include'):
             funcname, result = new_including_sys(line)
-            self.funlcs[funcname] = result
+            self.funcs[funcname] = result
         return 'sharp'
 
     def questfuncs(self, line: str, write_line):

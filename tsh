@@ -14,7 +14,7 @@ case $cmd in
 source tsh/venv/bin/activate
 python3 ./tsh/tsh.py "$@"
 ;;
-    run-poetry)
+    poetry)
 poetry run python tsh.py "$@"
 ;;
     repl)
