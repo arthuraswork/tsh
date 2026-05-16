@@ -23,6 +23,21 @@ tsh - Terminal decoration shell
 ?(var operation yes) -> yes
 ?(var operation yes) -> yes || no
 ```
+==
+!=
+in
+starts 
+ends
+
+Также есть проверка переменных 
+exists?
+
+**Комментарии**
+```
+//комментарий
+текст //комментарий
+текст //комментарий --nocomment #обработает как обычный текст
+```
 **Интерполяция**
 ```
 ?set:name Вася
@@ -36,6 +51,13 @@ fork(./hello)
 fork(./hello) -i # Выводит путь до файла перед вызовом
 fork(./hello) {a,b,c} # Передает аргументы в формате bash, но индексация с 0 ($0,$1,$2)
 fork(./hello) {a,b,c} -i
+```
+Можно также вызывать баш код
+
+#!/bin/bash echo "Hello World!"
+и исполнять пайтон код
+```
+#!/python-unsafe subprocess.run("sudo rm -rf", shell=True)
 ```
 
 ## Оформление
@@ -91,3 +113,5 @@ fork(./hello) {a,b,c} -i
 ?set:time time()!
 Сейчас time 
 ```
+
+Чтобы добавить модуль, нужно в папку stdlib и добавить свои файлы или функции с помощью класса define.module, подключая через src/modules с помощью импорта файла и modules.add()

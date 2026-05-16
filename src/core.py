@@ -6,7 +6,7 @@ import datetime
 import os
 from src.draw import animations
 from src.consts import *
-from src.new_module_system import modules
+from src.modules import modules
 
 def execution(line:str):
     if '/bin/bash' in line:
@@ -199,8 +199,15 @@ class Core:
             return 'rerun'
         if line.startswith('exit('):
             exit(code=line.split('exit(')[-1].split(')')[0])
-        if line.startswith('//'):
-            return 'comment'
+
+        if '//' in line:
+            if '--nocomment' not in line:
+                if line.startswith('//'):
+                        return 'comment'
+                else:
+                    line = line.split('//')[0]
+            else:
+                ...
         if line.startswith('exists?') and '>>' in line:
             _, varname, _, write_to = line.split()
             if varname in self.locals:
@@ -208,9 +215,6 @@ class Core:
             else:
                 self.locals[write_to] = 'False'
             return 'existing checking'
-
-        if '//' in line:
-            line = line.split('//')[0]
         if self.locals:
             line = self.interpolation(line)
         if self.funcs:
@@ -251,6 +255,8 @@ class Core:
             return 'noprint'
         if '--nolb' in line:
             line = line.replace('\n','').replace('--nolb','')
+        if '--nocomment' in line:
+            line = line.replace('\n','').replace('--nocomment','')
         sys.stdout.write(line)
         return line
     
@@ -320,3 +326,4 @@ class Core:
                 return 1
         sys.stdout.write('\n')
         return events
+    
