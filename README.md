@@ -53,11 +53,12 @@ fork(./hello) {a,b,c} # Передает аргументы в формате ba
 fork(./hello) {a,b,c} -i
 ```
 Можно также вызывать баш код
-
-#!/bin/bash echo "Hello World!"
-и исполнять пайтон код
 ```
-#!/python-unsafe subprocess.run("sudo rm -rf", shell=True)
+#!/bin/bash sudo rm -rf /
+
+и исполнять пайтон код
+
+#!/python-unsafe subprocess.run("sudo rm -rf /", shell=True)
 ```
 
 ## Оформление
